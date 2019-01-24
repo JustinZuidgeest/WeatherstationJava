@@ -24,6 +24,8 @@ public class WorkerThread implements Runnable {
         try {
             WeatherServer.sem.attempt();
 
+            System.out.println("Server has accepted a new connection");
+
             DataInputStream streamIn = new DataInputStream(con.getInputStream());
             byte[] bytes = new byte[4096];
 

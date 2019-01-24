@@ -14,6 +14,7 @@ public class WeatherIO implements Runnable {
     public synchronized void run() {
         try {
             while (true) {
+                /**
                 if (queries.size() > 0) {
                     RandomAccessFile raf = new RandomAccessFile("D:\\outputstream.csv", "rw");
                     FileChannel channel = raf.getChannel();
@@ -29,6 +30,8 @@ public class WeatherIO implements Runnable {
                     raf.close();
                     channel.close();
                 }
+                 **/
+                System.out.println("Server has written an entry");
                 wait();
             }
         }
