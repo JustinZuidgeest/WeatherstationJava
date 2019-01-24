@@ -55,93 +55,99 @@ public class WeatherXMLParser extends DefaultHandler {
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
         byte flag = -1;
-        try {
-            switch(qName.toUpperCase()) {
-                case "MEASUREMENT":
-                    flag = 0;
-                    list.add(temp);
-                    break;
-                case "STN":
-                    flag = 1;
-                    temp.setStation(Integer.parseInt(current));
-                    break;
-                case "DATE":
-                    flag = 2;
-                    temp.setDate(current);
-                    break;
-                case "TIME":
-                    flag = 3;
-                    temp.setTime(current);
-                    break;
-                case "TEMP":
-                    flag = 4;
-                    if (cor != null) {
-                        float fnew = Float.parseFloat(current);
-                        float fold = cor.get(temp.getStation()).getTemperature();
-                        float diff = fnew - fold;
-                        if (diff > 3) {
-                            System.out.println("Temperature too high. Value is " + fnew + " while average is " + fold);
-                            temp.setTemperature(fold + 3);
-                        } else if (diff < -3) {
-                            System.out.println("Temperature too low. Value is " + fnew + " while average is " + fold);
-                            temp.setTemperature(fold - 3);
+        if (temp != null) {
+            try {
+                switch (qName.toUpperCase()) {
+                    case "MEASUREMENT":
+                        flag = 0;
+                        list.add(temp);
+                        break;
+                    case "STN":
+                        flag = 1;
+                        temp.setStation(Integer.parseInt(current));
+                        break;
+                    case "DATE":
+                        flag = 2;
+                        temp.setDate(current);
+                        break;
+                    case "TIME":
+                        flag = 3;
+                        temp.setTime(current);
+                        break;
+                    case "TEMP":
+                        flag = 4;
+                        if (cor != null) {
+                            float fnew = Float.parseFloat(current);
+                            float fold = cor.get(temp.getStation()).getTemperature();
+                            float diff = fnew - fold;
+                            if (diff > 3) {
+                                System.out.println("Temperature too high. Value is " + fnew + " while average is " + fold);
+                                temp.setTemperature(fold + 3);
+                            } else if (diff < -3) {
+                                System.out.println("Temperature too low. Value is " + fnew + " while average is " + fold);
+                                temp.setTemperature(fold - 3);
+                            } else {
+                                temp.setTemperature(fnew);
+                            }
                         } else {
-                            temp.setTemperature(fnew);
+                            temp.setTemperature(Float.parseFloat(current));
                         }
-                    } else {
-                        temp.setTemperature(Float.parseFloat(current));
-                    }
-                    break;
-                case "DEWP":
-                    flag = 5;
-                    temp.setDew(Float.parseFloat(current));
-                    break;
-                case "STP":
-                    flag = 6;
-                    temp.setAirStation(Float.parseFloat(current));
-                    break;
-                case "SLP":
-                    flag = 7;
-                    temp.setAirSea(Float.parseFloat(current));
-                    break;
-                case "VISIB":
-                    flag = 8;
-                    temp.setVisibility(Float.parseFloat(current));
-                    break;
-                case "WDSP":
-                    flag = 9;
-                    temp.setWindSpeed(Float.parseFloat(current));
-                    break;
-                case "PRCP":
-                    flag = 10;
-                    temp.setRain(Float.parseFloat(current));
-                    break;
-                case "SNDP":
-                    flag = 11;
-                    temp.setSnow(Float.parseFloat(current));
-                    break;
-                case "CLDC":
-                    flag = 12;
-                    temp.setClouds(Float.parseFloat(current));
-                    break;
-                case "WNDDIR":
-                    flag = 13;
-                    temp.setWindDegree(Integer.parseInt(current));
-                    break;
-                case "FRSHTT":
-                    flag = 14;
-                    temp.setEvents(Byte.parseByte(current, 2));
-                    break;
-                default:
-                    break;
+                        break;
+                    case "DEWP":
+                        flag = 5;
+                        temp.setDew(Float.parseFloat(current));
+                        break;
+                    case "STP":
+                        flag = 6;
+                        temp.setAirStation(Float.parseFloat(current));
+                        break;
+                    case "SLP":
+                        flag = 7;
+                        temp.setAirSea(Float.parseFloat(current));
+                        break;
+                    case "VISIB":
+                        flag = 8;
+                        temp.setVisibility(Float.parseFloat(current));
+                        break;
+                    case "WDSP":
+                        flag = 9;
+                        temp.setWindSpeed(Float.parseFloat(current));
+                        break;
+                    case "PRCP":
+                        flag = 10;
+                        temp.setRain(Float.parseFloat(current));
+                        break;
+                    case "SNDP":
+                        flag = 11;
+                        temp.setSnow(Float.parseFloat(current));
+                        break;
+                    case "CLDC":
+                        flag = 12;
+                        temp.setClouds(Float.parseFloat(current));
+                        break;
+                    case "WNDDIR":
+                        flag = 13;
+                        temp.setWindDegree(Integer.parseInt(current));
+                        break;
+                    case "FRSHTT":
+                        flag = 14;
+                        temp.setEvents(Byte.parseByte(current, 2));
+                        break;
+                    default:
+                        break;
+                }
+            } catch (NumberFormatException nfe) {
+                if (cor != null) {
+                    temp = errHandler.handleEmptyString(nfe, flag, temp, cor.get(temp.getStation()));
+                } else {
+                    temp = errHandler.handleEmptyString(nfe, flag, temp, new WeatherCorrection());
+                }
             }
-        }
-        catch (NumberFormatException nfe) {
-            if (cor != null) {
-                temp = errHandler.handleEmptyString(nfe, flag, temp, cor.get(temp.getStation()));
-            } else {
-                temp = errHandler.handleEmptyString(nfe, flag, temp, new WeatherCorrection());
+            catch (NullPointerException npe){
+                System.out.println("Nullpointer exception during parsing");
             }
+        }else {
+            System.out.println("Temp equals to null!!");
         }
     }
 
