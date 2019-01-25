@@ -29,7 +29,7 @@ public class WeatherXMLErrorHandler {
                 wm.setDew(wc.getDew());
                 break;
             case 6:
-                wm.setAirStation(wc.getStation());
+                wm.setAirStation(wc.getAirStation());
                 break;
             case 7:
                 wm.setAirSea(wc.getAirSea());
@@ -55,6 +55,9 @@ public class WeatherXMLErrorHandler {
             case 14:
                 byte b = 0;
                 wm.setEvents(b);
+                break;
+            case 15:
+                // Might as well surrender
                 break;
             default:
                 // Might as well surrender

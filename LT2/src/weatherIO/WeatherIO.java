@@ -15,7 +15,7 @@ public class WeatherIO implements Runnable {
         try {
             while (true) {
                 if (queries.size() > 0) {
-                    RandomAccessFile raf = new RandomAccessFile("D:\\outputstream.csv", "rw");
+                    RandomAccessFile raf = new RandomAccessFile("E:\\outputstream.csv", "rw");
                     FileChannel channel = raf.getChannel();
                     raf.seek(raf.length());
                     while (queries.size() > 0) {

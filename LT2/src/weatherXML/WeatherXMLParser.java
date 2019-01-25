@@ -10,31 +10,20 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 
 public class WeatherXMLParser extends DefaultHandler {
 
+    private ArrayList<ArrayList> done = new ArrayList<>();
     private ArrayList<WeatherMeasurement> list = new ArrayList<>();
     private WeatherXMLErrorHandler errHandler = new WeatherXMLErrorHandler();
-    private ByteArrayInputStream data;
     private WeatherMeasurement temp;
     private String current;
-    private HashMap<Integer, WeatherCorrection> cor;
+    private HashMap<Integer, WeatherCorrection> correct;
 
-    public WeatherXMLParser(ByteArrayInputStream data) {
-        this.data = data;
-        parseData();
-    }
+    public WeatherXMLParser() {}
 
-    public WeatherXMLParser(ByteArrayInputStream data, HashMap<Integer, WeatherCorrection> cor) {
-        this.data = data;
-        this.cor = cor;
-        parseData();
-    }
-
-    public void parseData() {
+    public void parseData(ByteArrayInputStream data) {
         SAXParserFactory fac = SAXParserFactory.newInstance();
         try {
             SAXParser par = fac.newSAXParser();
@@ -50,6 +39,9 @@ public class WeatherXMLParser extends DefaultHandler {
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equalsIgnoreCase("MEASUREMENT")) {
             temp = new WeatherMeasurement();
+        }
+        if (qName.equalsIgnoreCase("WEATHERDATA")) {
+            list = new ArrayList<>();
         }
     }
 
@@ -75,9 +67,9 @@ public class WeatherXMLParser extends DefaultHandler {
                     break;
                 case "TEMP":
                     flag = 4;
-                    if (cor != null) {
+                    if (correct != null) {
                         float fnew = Float.parseFloat(current);
-                        float fold = cor.get(temp.getStation()).getTemperature();
+                        float fold = correct.get(temp.getStation()).getTemperature();
                         float diff = fnew - fold;
                         if (diff > 3) {
                             System.out.println("Temperature too high. Value is " + fnew + " while average is " + fold);
@@ -132,13 +124,18 @@ public class WeatherXMLParser extends DefaultHandler {
                     flag = 14;
                     temp.setEvents(Byte.parseByte(current, 2));
                     break;
+                case "WEATHERDATA":
+                    flag = 15;
+                    done.add(list);
+                    setCorrection();
+                    break;
                 default:
                     break;
             }
         }
         catch (NumberFormatException nfe) {
-            if (cor != null) {
-                temp = errHandler.handleEmptyString(nfe, flag, temp, cor.get(temp.getStation()));
+            if (correct != null) {
+                temp = errHandler.handleEmptyString(nfe, flag, temp, correct.get(temp.getStation()));
             } else {
                 temp = errHandler.handleEmptyString(nfe, flag, temp, new WeatherCorrection());
             }
@@ -149,21 +146,22 @@ public class WeatherXMLParser extends DefaultHandler {
         current = new String(ch, start, length);
     }
 
-    class SortByStation implements Comparator<WeatherMeasurement> {
-        public int compare(WeatherMeasurement a, WeatherMeasurement b) {
-            return a.getStation() - b.getStation();
+    private void createCorrections() {
+        correct = new HashMap<>();
+        for (WeatherMeasurement wm : list) {
+            WeatherCorrection wc = new WeatherCorrection(wm);
+            this.correct.put(wc.getStation(), wc);
         }
     }
 
     public ArrayList<WeatherMeasurement> getData() {
-        Collections.sort(list, new SortByStation());
-        return list;
+        return done.size() > 0 ? done.remove(0) : null;
     }
 
-    public HashMap<Integer, WeatherCorrection> getCorrection() {
+    private void setCorrection() {
+        if (correct == null) { createCorrections(); }
         for (WeatherMeasurement wm : list) {
-            cor.get(wm.getStation()).addMeasurement(wm);
+            correct.get(wm.getStation()).addMeasurement(wm);
         }
-        return cor;
     }
 }

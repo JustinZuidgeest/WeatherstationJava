@@ -13,7 +13,9 @@ public class WeatherCorrection {
     private float clouds;
     private float windDegree;
 
-    private float multiplier = (2f/31f);
+    private final static float mp = (2f/31f);
+    private int count = 1;
+
 
     public WeatherCorrection() {
         this.station = 0;
@@ -44,16 +46,35 @@ public class WeatherCorrection {
     }
 
     public void addMeasurement(WeatherMeasurement wm) {
-        this.temperature = this.temperature * (1 - multiplier) + multiplier * wm.getTemperature();
-        this.dew = this.dew * (1 - multiplier) + multiplier * wm.getDew();
-        this.airStation = this.airStation * (1 - multiplier) + multiplier * wm.getAirStation();
-        this.airSea = this.airSea * (1 - multiplier) + multiplier * wm.getAirSea();
-        this.visibility = this.visibility * (1 - multiplier) + multiplier * wm.getVisibility();
-        this.windSpeed = this.windSpeed * (1 - multiplier) + multiplier * wm.getWindSpeed();
-        this.rain = this.rain * (1 - multiplier) + multiplier * wm.getRain();
-        this.snow = this.snow * (1 - multiplier) + multiplier * wm.getSnow();
-        this.clouds = this.clouds * (1 - multiplier) + multiplier * wm.getClouds();
-        this.windDegree = this.windDegree * (1 - multiplier) + multiplier * wm.getWindDegree();
+        if (count < 30) {
+            SimpleAverage(wm);
+            return;
+        }
+        temperature = temperature * (1 - mp) + mp * wm.getTemperature();
+        dew = dew * (1 - mp) + mp * wm.getDew();
+        airStation = airStation * (1 - mp) + mp * wm.getAirStation();
+        airSea = airSea * (1 - mp) + mp * wm.getAirSea();
+        visibility = visibility * (1 - mp) + mp * wm.getVisibility();
+        windSpeed = windSpeed * (1 - mp) + mp * wm.getWindSpeed();
+        rain = rain * (1 - mp) + mp * wm.getRain();
+        snow = snow * (1 - mp) + mp * wm.getSnow();
+        clouds = clouds * (1 - mp) + mp * wm.getClouds();
+        windDegree = windDegree * (1 - mp) + mp * wm.getWindDegree();
+    }
+
+    private void SimpleAverage(WeatherMeasurement wm) {
+        float n = 1f / (count + 1);
+        temperature = temperature * count * n + n * wm.getTemperature();
+        dew = dew * count * n + n * wm.getDew();
+        airStation = airStation * count * n + n * wm.getAirStation();
+        airSea = airSea * count * n + n * wm.getAirSea();
+        visibility = visibility * count * n + n * wm.getVisibility();
+        windSpeed = windSpeed * count * n + n * wm.getWindSpeed();
+        rain = rain * count * n + n * wm.getRain();
+        snow = snow * count * n + n * wm.getSnow();
+        clouds = clouds * count * n + n * wm.getClouds();
+        windDegree = windDegree * count * n + n * wm.getWindDegree();
+        count++;
     }
 
     public int getStation()         { return station; }
