@@ -18,6 +18,7 @@ public class Semaphore {
     public synchronized void close() throws InterruptedException {
         while (this.val >= this.max) wait();
         this.val++;
+        System.out.println(this.val);
         this.notify();
     }
 }
