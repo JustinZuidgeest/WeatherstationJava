@@ -19,6 +19,7 @@ public class Main {
         try {
             ServerSocket server = new ServerSocket(PORT);
             while (true) {
+                System.out.println("Waiting for connections...");
                 connection = server.accept();
                 System.out.println("New Connection Accepted");
                 Thread connectionThread = new Thread(new ConnectionWorker(connection));

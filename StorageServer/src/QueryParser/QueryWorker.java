@@ -63,12 +63,13 @@ public class QueryWorker implements Runnable{
         StringBuilder queryBuilder = new StringBuilder();
         String parsedQuery;
 
+        queryBuilder.append("LOCATION,COUNTRY,WINDCHILL,AIRPRESSURE;");
+
         for (ArrayList<WeatherMeasurement> countryMeasurements : queryMeasurements){
             WeatherMeasurement[] countryMeasurementsArray = new WeatherMeasurement[countryMeasurements.size()];
             countryMeasurementsArray = countryMeasurements.toArray(countryMeasurementsArray);
 
             Arrays.sort(countryMeasurementsArray, new WindchillSorter());
-
             StringBuilder tempBuilder = new StringBuilder();
 
             for (int i=0; i < count; i++){
