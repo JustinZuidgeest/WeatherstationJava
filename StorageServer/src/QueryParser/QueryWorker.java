@@ -24,7 +24,7 @@ public class QueryWorker implements Runnable{
         long startTime = System.currentTimeMillis();
         parseQuery();
         long estimatedTime = System.currentTimeMillis() - startTime;
-        System.out.println("Estimated execution time: " +estimatedTime);
+        System.out.println("Query parsed. Estimated execution time: " +estimatedTime);
     }
 
     private void parseQuery(){
