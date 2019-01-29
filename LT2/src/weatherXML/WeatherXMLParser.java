@@ -14,7 +14,6 @@ import java.util.HashMap;
 
 public class WeatherXMLParser extends DefaultHandler {
 
-    private ArrayList<ArrayList> done = new ArrayList<>();
     private ArrayList<WeatherMeasurement> list = new ArrayList<>();
     private WeatherXMLErrorHandler errHandler = new WeatherXMLErrorHandler();
     private WeatherMeasurement temp;
@@ -34,14 +33,17 @@ public class WeatherXMLParser extends DefaultHandler {
         catch (IOException ioe) {}
     }
 
-    public void startDocument() throws SAXException {}
+    public void startDocument() throws SAXException {
+        list = new ArrayList<>();
+    }
+
+    public void endDocument() throws SAXException {
+        setCorrection();
+    }
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equalsIgnoreCase("MEASUREMENT")) {
             temp = new WeatherMeasurement();
-        }
-        if (qName.equalsIgnoreCase("WEATHERDATA")) {
-            list = new ArrayList<>();
         }
     }
 
@@ -67,15 +69,16 @@ public class WeatherXMLParser extends DefaultHandler {
                     break;
                 case "TEMP":
                     flag = 4;
+                    /*
                     if (correct != null) {
                         float fnew = Float.parseFloat(current);
                         float fold = correct.get(temp.getStation()).getTemperature();
                         float diff = fnew - fold;
                         if (diff > 3) {
-                            System.out.println("Temperature too high. Value is " + fnew + " while average is " + fold);
+                            //System.out.println("Temperature too high. Value is " + fnew + " while average is " + fold);
                             temp.setTemperature(fold + 3);
                         } else if (diff < -3) {
-                            System.out.println("Temperature too low. Value is " + fnew + " while average is " + fold);
+                            //System.out.println("Temperature too low. Value is " + fnew + " while average is " + fold);
                             temp.setTemperature(fold - 3);
                         } else {
                             temp.setTemperature(fnew);
@@ -83,6 +86,8 @@ public class WeatherXMLParser extends DefaultHandler {
                     } else {
                         temp.setTemperature(Float.parseFloat(current));
                     }
+                    */
+                    temp.setTemperature(Float.parseFloat(current));
                     break;
                 case "DEWP":
                     flag = 5;
@@ -124,17 +129,12 @@ public class WeatherXMLParser extends DefaultHandler {
                     flag = 14;
                     temp.setEvents(Byte.parseByte(current, 2));
                     break;
-                case "WEATHERDATA":
-                    flag = 15;
-                    done.add(list);
-                    setCorrection();
-                    break;
                 default:
                     break;
             }
         }
         catch (NumberFormatException nfe) {
-            if (correct != null) {
+            if (correct != null && correct.size() > 9) {
                 temp = errHandler.handleEmptyString(nfe, flag, temp, correct.get(temp.getStation()));
             } else {
                 temp = errHandler.handleEmptyString(nfe, flag, temp, new WeatherCorrection());
@@ -154,14 +154,20 @@ public class WeatherXMLParser extends DefaultHandler {
         }
     }
 
-    public ArrayList<WeatherMeasurement> getData() {
-        return done.size() > 0 ? done.remove(0) : null;
-    }
+    public ArrayList<WeatherMeasurement> getData() { return list; }
 
     private void setCorrection() {
-        if (correct == null) { createCorrections(); }
-        for (WeatherMeasurement wm : list) {
-            correct.get(wm.getStation()).addMeasurement(wm);
+        try {
+            if (correct == null) {
+                createCorrections();
+            }
+            for (WeatherMeasurement wm : list) {
+                correct.get(wm.getStation()).addMeasurement(wm);
+            }
+        }
+        catch (NullPointerException npe) {
+            System.out.println("NPE: " + npe);
+            createCorrections();
         }
     }
 }

@@ -5,7 +5,7 @@ public class WeatherXMLErrorHandler {
     public WeatherXMLErrorHandler() {}
 
     public WeatherMeasurement handleEmptyString(Exception e, byte flag, WeatherMeasurement wm, WeatherCorrection wc) {
-        System.out.println("Flag: " + flag);
+        //System.out.println("Flag: " + flag);
         switch (flag) {
             case -1:
                 // Might as well surrender

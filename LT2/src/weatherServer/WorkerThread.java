@@ -1,12 +1,13 @@
 package weatherServer;
 
-import weatherIO.WeatherIOParser;
-import weatherXML.WeatherMeasurement;
+import weatherIO.WeatherCSVParser;
 import weatherXML.WeatherXMLParser;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import static java.lang.Thread.yield;
 
 public class WorkerThread implements Runnable {
 
@@ -24,18 +25,18 @@ public class WorkerThread implements Runnable {
             DataInputStream streamIn = new DataInputStream(con.getInputStream());
             WeatherXMLParser parser = new WeatherXMLParser();
             byte[] bytes = new byte[4096];
-
-            while ((streamIn.read(bytes)) > 0) {
+            while (streamIn.available() < 2921 && !con.isBound()) { yield(); }
+            while (streamIn.read(bytes) > 0) {
                 parser.parseData(new ByteArrayInputStream(bytes));
-                ArrayList<WeatherMeasurement> alwm = parser.getData();
-                if (alwm != null) { data.add(alwm); }
+                data.add(parser.getData());
                 if (data.size() >= 10) {
-                    WeatherIOParser ioParser = new WeatherIOParser();
+                    WeatherCSVParser csvParser = new WeatherCSVParser();
                     for (int x=0; x<10; x++) {
-                        ioParser.parseChuck(data.remove(0));
+                        csvParser.parseChuck(data.remove(0));
                     }
-                    WeatherServer.wio.addQuery(ioParser.getQuery());
+                    WeatherServer.wio.addQuery(csvParser.getCSV());
                 }
+                while (streamIn.available() < 2921 && !con.isBound()) { yield(); }
             }
 
             this.con.close();
