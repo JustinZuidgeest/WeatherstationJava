@@ -19,6 +19,7 @@ public class WeatherXMLParser extends DefaultHandler {
     private WeatherMeasurement temp;
     private String current;
     private HashMap<Integer, WeatherCorrection> correct;
+    private String datetime = "";
 
     public WeatherXMLParser() {}
 
@@ -27,26 +28,34 @@ public class WeatherXMLParser extends DefaultHandler {
         try {
             SAXParser par = fac.newSAXParser();
             par.parse(data, this);
+            System.out.println("Done");
         }
         catch (ParserConfigurationException pce) {}
         catch (SAXException se) {}
         catch (IOException ioe) {}
     }
 
+    @Override
     public void startDocument() throws SAXException {
         list = new ArrayList<>();
+        System.out.println("Start");
     }
 
+    @Override
     public void endDocument() throws SAXException {
+        System.out.println("End");
         setCorrection();
+        datetime = temp.getDate() + "_" + temp.getTime();
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equalsIgnoreCase("MEASUREMENT")) {
             temp = new WeatherMeasurement();
         }
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         byte flag = -1;
         try {
@@ -69,7 +78,6 @@ public class WeatherXMLParser extends DefaultHandler {
                     break;
                 case "TEMP":
                     flag = 4;
-                    /*
                     if (correct != null) {
                         float fnew = Float.parseFloat(current);
                         float fold = correct.get(temp.getStation()).getTemperature();
@@ -86,8 +94,6 @@ public class WeatherXMLParser extends DefaultHandler {
                     } else {
                         temp.setTemperature(Float.parseFloat(current));
                     }
-                    */
-                    temp.setTemperature(Float.parseFloat(current));
                     break;
                 case "DEWP":
                     flag = 5;
@@ -140,8 +146,12 @@ public class WeatherXMLParser extends DefaultHandler {
                 temp = errHandler.handleEmptyString(nfe, flag, temp, new WeatherCorrection());
             }
         }
+        catch (NullPointerException npe) {
+            temp = errHandler.handleEmptyString(npe, flag, temp, new WeatherCorrection());
+        }
     }
 
+    @Override
     public void characters(char ch[], int start, int length) throws SAXException {
         current = new String(ch, start, length);
     }
@@ -154,7 +164,6 @@ public class WeatherXMLParser extends DefaultHandler {
         }
     }
 
-    public ArrayList<WeatherMeasurement> getData() { return list; }
 
     private void setCorrection() {
         try {
@@ -170,4 +179,6 @@ public class WeatherXMLParser extends DefaultHandler {
             createCorrections();
         }
     }
+    public ArrayList<WeatherMeasurement> getData() { return list; }
+    public String getDateTime() { return datetime; }
 }

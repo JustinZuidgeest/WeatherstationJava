@@ -7,21 +7,6 @@ public class WeatherXMLErrorHandler {
     public WeatherMeasurement handleEmptyString(Exception e, byte flag, WeatherMeasurement wm, WeatherCorrection wc) {
         //System.out.println("Flag: " + flag);
         switch (flag) {
-            case -1:
-                // Might as well surrender
-                break;
-            case 0:
-                // Might as well surrender
-                break;
-            case 1:
-                // Might as well surrender
-                break;
-            case 2:
-                // Might as well surrender
-                break;
-            case 3:
-                // Might as well surrender
-                break;
             case 4:
                 wm.setTemperature(wc.getTemperature());
                 break;
@@ -56,11 +41,7 @@ public class WeatherXMLErrorHandler {
                 byte b = 0;
                 wm.setEvents(b);
                 break;
-            case 15:
-                // Might as well surrender
-                break;
             default:
-                // Might as well surrender
                 break;
         }
         return wm;
