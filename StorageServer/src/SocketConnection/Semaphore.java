@@ -1,5 +1,9 @@
 package SocketConnection;
 
+/**
+ * Semaphore class to control the amount of threads at any time
+ * Class structure retrieved from Blackboard. Credit to Jos Bredek.
+ */
 public class Semaphore {
     private int max;
     private int val;

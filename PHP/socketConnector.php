@@ -9,13 +9,11 @@ function update(){
   socket_write($socket, $input, strlen($input));
   $result = socket_read($socket, 4096, PHP_NORMAL_READ);
 
+  //Close socket
+  socket_close($socket);
+
   //Parse data into associative array
   $parsed = parseData($result);
-  
-  //Close connection with storage application
-  $input = "close\r\n";
-  socket_write($socket, $input, strlen($input));
-  //socket_close($socket);
 
   //Return parsed data to caller
   return $parsed;
@@ -56,11 +54,11 @@ function parseData($result){
   return $aso;
 }
 
-$data = update();
+//$data = update();
 
 // Print result
-foreach($data as $row) {
-  print_r($row);
-  echo "<br><br>";
-}
+//foreach($data as $row) {
+  //print_r($row);
+  //echo "<br><br>";
+//}
 ?>

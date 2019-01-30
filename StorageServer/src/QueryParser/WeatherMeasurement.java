@@ -1,5 +1,8 @@
 package QueryParser;
 
+/**
+ * WeatherMeasurement holds the measurement data of 1 weatherstation in the form of a class
+ */
 public class WeatherMeasurement {
 
     private String station;
@@ -21,8 +24,8 @@ public class WeatherMeasurement {
     private String[] events;
 
     public WeatherMeasurement(String station, String location, String country, String date, String time, String temperature,
-                              String dew, String airStation, String airSea, String visibility, String windSpeed, String rain,
-                              String snow, String clouds, String windDegree, String[] events)
+                              float windchill, String dew, String airStation, String airSea, String visibility,
+                              String windSpeed, String rain, String snow, String clouds, String windDegree, String[] events)
     {
         this.station = station;
         this.location = location;
@@ -30,7 +33,7 @@ public class WeatherMeasurement {
         this.date = date;
         this.time = time;
         this.temperature = temperature;
-        this.windchill = Float.parseFloat(temperature);
+        this.windchill = windchill;
         this.dew = dew;
         this.airStation = airStation;
         this.airSea = airSea;
@@ -67,7 +70,9 @@ public class WeatherMeasurement {
 
     public Float getWindchill() { return windchill; }
 
-    public String getWindchillString() { return Float.toString(windchill); }
+    public String getWindchillString() {
+        return String.format("\"%.2f\"", windchill).replace(",", ".");
+    }
 
     public String getDew() {
         return dew;
