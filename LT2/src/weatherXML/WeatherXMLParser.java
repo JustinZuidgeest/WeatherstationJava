@@ -14,8 +14,8 @@ import java.util.HashMap;
 
 public class WeatherXMLParser extends DefaultHandler {
 
-    private ArrayList<WeatherMeasurement> list = new ArrayList<>();
     private WeatherXMLErrorHandler errHandler = new WeatherXMLErrorHandler();
+    private ArrayList<WeatherMeasurement> list;
     private WeatherMeasurement temp;
     private String current;
     private HashMap<Integer, WeatherCorrection> correct;
@@ -28,22 +28,19 @@ public class WeatherXMLParser extends DefaultHandler {
         try {
             SAXParser par = fac.newSAXParser();
             par.parse(data, this);
-            System.out.println("Done");
         }
-        catch (ParserConfigurationException pce) {}
-        catch (SAXException se) {}
-        catch (IOException ioe) {}
+        catch (ParserConfigurationException pce) { System.out.println("pce: " + pce); }
+        catch (SAXException se) { System.out.println("se: " + se); }
+        catch (IOException ioe) { System.out.println("ioe: " + ioe); }
     }
 
     @Override
     public void startDocument() throws SAXException {
         list = new ArrayList<>();
-        System.out.println("Start");
     }
 
     @Override
     public void endDocument() throws SAXException {
-        System.out.println("End");
         setCorrection();
         datetime = temp.getDate() + "_" + temp.getTime();
     }
@@ -163,7 +160,6 @@ public class WeatherXMLParser extends DefaultHandler {
             this.correct.put(wc.getStation(), wc);
         }
     }
-
 
     private void setCorrection() {
         try {

@@ -16,6 +16,8 @@ public class WeatherServer {
     private static ExecutorService pool = Executors.newFixedThreadPool(800);
 
     public static void main(String[] args) {
+        Thread ioWorker = new Thread(wio);
+        ioWorker.start();
         Socket con;
         try {
             ServerSocket server = new ServerSocket(PORT);

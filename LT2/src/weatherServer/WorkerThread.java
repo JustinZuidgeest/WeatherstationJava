@@ -7,13 +7,10 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import static java.lang.Thread.yield;
-
 public class WorkerThread implements Runnable {
 
     private Socket con;
     private ArrayList<ArrayList> data = new ArrayList<>();
-    private String datetime;
 
     public WorkerThread(Socket con) {
         this.con = con;
@@ -22,25 +19,26 @@ public class WorkerThread implements Runnable {
     public void run() {
         try {
             WeatherServer.sem.attempt();
-
-            DataInputStream streamIn = new DataInputStream(con.getInputStream());
-            WeatherXMLParser parser = new WeatherXMLParser();
+            BufferedInputStream in = new BufferedInputStream(con.getInputStream());
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
             byte[] bytes = new byte[4096];
-            while (streamIn.available() < 2921 && !con.isBound()) { yield(); }
-            while (streamIn.read(bytes) > 0) {
-                parser.parseData(new ByteArrayInputStream(bytes));
+            int count;
+            WeatherXMLParser parser = new WeatherXMLParser();
+            //Thread.sleep(4000);
+            while ((count = in.read(bytes)) > 0) {
+                buf.write(bytes, 0, count);
+                System.out.println(buf.size());
+                if (count == 4096 || count == 1460) { continue; }
+                parser.parseData(new ByteArrayInputStream(buf.toByteArray()));
                 data.add(parser.getData());
-
-                datetime = parser.getDateTime().replace(":", "-");
-                System.out.println("dt: " + datetime);
-                if (datetime.lastIndexOf("00", 16) != -1) {
+                if (data.size() > 10) {
                     WeatherCSVParser csvParser = new WeatherCSVParser();
-                    for (int x=0; x<data.size(); x++) {
+                    for (int x=0; x<10; x++) {
                         csvParser.parseChuck(data.remove(0));
                     }
-                    WeatherServer.wio.addLines(datetime, csvParser.getCSV());
+                    WeatherServer.wio.addLines(parser.getDateTime().replace(":", "-").substring(0, 16), csvParser.getCSV());
                 }
-                while (streamIn.available() < 2921 && !con.isBound()) { yield(); }
+                buf = new ByteArrayOutputStream();
             }
 
             this.con.close();
