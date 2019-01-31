@@ -32,12 +32,23 @@ public class IOWorker{
             //Loop through every line in the stations.csv file and save the data in a temporary Hashmap
             while((line = filereader.readLine()) != null){
                 splitString = line.split(",");
+
                 tempMap = new HashMap<>();
                 tempMap.put("LOC", splitString[1]);
-                tempMap.put("CNT", splitString[2]);
                 tempMap.put("LAT", splitString[3]);
                 tempMap.put("LONG", splitString[4]);
                 tempMap.put("ELV", splitString[5]);
+
+                //Check if the station is situated on the northern polar circle by checking for Latitude over 64 degrees
+                if(Float.parseFloat(splitString[3]) > 64.0){
+                    tempMap.put("CNT", "NORTH POLE");
+                }
+                //Check if the station is situated on the southern polar circle by checking for Latitude under -64 degrees
+                else if(Float.parseFloat(splitString[3]) < -64.0){
+                    tempMap.put("CNT", "SOUTH POLE");
+                }else{
+                    tempMap.put("CNT", splitString[2]);
+                }
 
                 //Append the temporary hashmap with the weatherstion data to the stationList variable
                 stationList.put(splitString[0], tempMap);

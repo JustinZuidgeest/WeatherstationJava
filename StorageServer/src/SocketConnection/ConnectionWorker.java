@@ -42,7 +42,7 @@ public class ConnectionWorker implements Runnable{
                 //If a String is send over the socket, handle it according to the contents of that String
                 if ((bufferedReader.ready() && (input = bufferedReader.readLine()) != null)) {
                     if (input.startsWith("update")) {
-                        String[] countries = {"FRANCE", "MEXICO", "UNITED STATES", "SPAIN"};
+                        String[] countries = {"FRANCE", "MEXICO", "UNITED STATES", "SPAIN", "NORTH POLE", "SOUTH POLE"};
                         Thread queryThread = new Thread(new QueryWorker(this, countries , 10));
                         queryThread.start();
                     }else if(input.startsWith("fetch")){

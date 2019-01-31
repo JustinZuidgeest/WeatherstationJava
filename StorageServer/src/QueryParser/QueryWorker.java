@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /**
- * The QueryWorker class is reponsible for parsing the requested data into a String format to be sent back to the PHP
+ * The QueryWorker class is responsible for parsing the requested data into a String format to be sent back to the PHP
  * server for processing
  */
 public class QueryWorker implements Runnable{
@@ -118,7 +118,6 @@ public class QueryWorker implements Runnable{
                 tempBuilder.append(tempMeasurement.getCountry());
                 tempBuilder.append(",");
                 tempBuilder.append(tempMeasurement.getWindchillString());
-                System.out.println(tempMeasurement.getWindchillString());
                 tempBuilder.append(",");
                 tempBuilder.append(tempMeasurement.getAirStation());
                 tempBuilder.append(";");
