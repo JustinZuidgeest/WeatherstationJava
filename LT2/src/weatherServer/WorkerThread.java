@@ -6,11 +6,13 @@ import weatherXML.WeatherXMLParser;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class WorkerThread implements Runnable {
 
     private Socket con;
     private ArrayList<ArrayList> data = new ArrayList<>();
+    private static final byte mark = "?".getBytes()[0];
 
     public WorkerThread(Socket con) {
         this.con = con;
@@ -26,9 +28,8 @@ public class WorkerThread implements Runnable {
             WeatherXMLParser parser = new WeatherXMLParser();
             //Thread.sleep(4000);
             while ((count = in.read(bytes)) > 0) {
+                if (count == 4096) { System.out.println("Ree: "); }
                 buf.write(bytes, 0, count);
-                System.out.println(buf.size());
-                if (count == 4096 || count == 1460) { continue; }
                 parser.parseData(new ByteArrayInputStream(buf.toByteArray()));
                 data.add(parser.getData());
                 if (data.size() > 10) {

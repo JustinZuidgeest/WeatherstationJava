@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 
-public class WeatherIO implements Runnable {
+public class WeatherIO {
     private final static String fs = System.getProperty("file.separator");
     private HashMap<String, StringBuilder> data = new HashMap<>();
     private String last;
@@ -15,26 +15,10 @@ public class WeatherIO implements Runnable {
 
     public WeatherIO() {}
 
-    public synchronized void run() {
-        try {
-            while (true) {
-                if (working) {
-                    File file = new File(last + ".csv");
-                    RandomAccessFile raf = new RandomAccessFile(file, "rw");
-                    FileChannel fc = raf.getChannel();
-                    byte[] b = data.remove(last).toString().getBytes();
-                    ByteBuffer buffer = ByteBuffer.allocate(b.length);
-                    buffer.put(b);
-                    buffer.flip();
-                    fc.write(buffer);
-                    raf.close();
-                    fc.close();
-                    working = false;
-                }
-                wait();
-            }
-        }
-        catch (Exception e) { System.out.println("e: " + e); e.printStackTrace(); }
+    public void doDaTing() {
+        WeatherIOWorker wiow = new WeatherIOWorker(last, data.remove(last));
+        Thread worker = new Thread(wiow);
+        worker.start();
     }
 
     public synchronized void addLines(String dt, String q) {
@@ -42,7 +26,7 @@ public class WeatherIO implements Runnable {
             if (current != null) {
                 System.out.println("Going current: " + current);
                 last = current;
-                working = true;
+                doDaTing();
             }
             current = dt;
         }
