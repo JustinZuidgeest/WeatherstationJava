@@ -32,7 +32,6 @@ public class WeatherXMLParser extends DefaultHandler {
         catch (ParserConfigurationException pce) { System.out.println("pce: " + pce); }
         catch (SAXException se) {
             System.out.println("se: " + se);
-            parseData(data);
         }
         catch (IOException ioe) { System.out.println("ioe: " + ioe); }
     }
@@ -63,7 +62,6 @@ public class WeatherXMLParser extends DefaultHandler {
                 case "MEASUREMENT":
                     flag = 0;
                     list.add(temp);
-                    System.out.println("Yeah");
                     break;
                 case "STN":
                     flag = 1;

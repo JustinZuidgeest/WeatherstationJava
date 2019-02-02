@@ -149,4 +149,37 @@ public class WeatherMeasurement {
         this.windDegree = windDegree;
     }
 
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(station);
+        sb.append(",");
+        sb.append(date);
+        sb.append(",");
+        sb.append(time);
+        sb.append(",");
+        sb.append(temperature);
+        sb.append(",");
+        sb.append(dew);
+        sb.append(",");
+        sb.append(airStation);
+        sb.append(",");
+        sb.append(airSea);
+        sb.append(",");
+        sb.append(visibility);
+        sb.append(",");
+        sb.append(windSpeed);
+        sb.append(",");
+        sb.append(rain);
+        sb.append(",");
+        sb.append(snow);
+        sb.append(",");
+        sb.append(clouds);
+        sb.append(",");
+        sb.append(windDegree);
+        sb.append(",");
+        sb.append(events);
+        sb.append("\n");
+        return sb.toString();
+    }
+
 }
