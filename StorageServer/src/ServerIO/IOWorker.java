@@ -13,6 +13,8 @@ import java.util.HashMap;
 public class IOWorker{
 
     private HashMap<String, HashMap> stationList = new HashMap<>();
+    private ArrayList<String> updateList;
+    private volatile boolean queryable = false;
 
     public IOWorker(){
         generateStationList();
@@ -62,21 +64,12 @@ public class IOWorker{
     }
 
     /**
-     * Returns the variable that is created at the start of the program
+     * Opens the latest data for the update call from the website and stores it in a variable for faster retrieval
+     * This method is not syncronized because it can only be called by a single instance of the PathWatcher thread
      *
-     * @return The Map of all weatherstations as HashMaps
+     * @param filepath The path to the file that should be opened and processed
      */
-    public HashMap<String, HashMap> getStationList(){
-        return stationList;
-    }
-
-    /**
-     * Opens a file and stores every line in the file as a String in an ArrayList
-     *
-     * @param filepath  The path to the file that needs to be read
-     * @return  An ArrayList containing Strings for every line in the file that was read
-     */
-    public synchronized ArrayList<String> readFile(String filepath){
+    public void refreshUpdateList(String filepath){
         String line;
         ArrayList<String> dataset = new ArrayList<>();
         try{
@@ -90,6 +83,27 @@ public class IOWorker{
         }catch(IOException ioException){
             System.out.println("Error reading csv line" + ioException.toString());
         }
-        return dataset;
+        updateList = dataset;
     }
+
+    /**
+     * Returns the variable that is created at the start of the program
+     *
+     * @return The Map of all weatherstations as HashMaps
+     */
+    public synchronized HashMap<String, HashMap> getStationList(){
+        return stationList;
+    }
+
+    /**
+     * Returns the latest cached version of the minute data for the update call that is requested from the
+     * nova moda website
+     *
+     * @return An ArrayList containing a String object for every line of the latest csv data file
+     */
+    public synchronized ArrayList<String> getUpdateList() { return updateList; }
+
+    public void setQueryable(boolean queryable) { this.queryable = queryable; }
+
+    public boolean getQueryable() { return queryable; }
 }

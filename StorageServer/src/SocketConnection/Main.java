@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import ServerIO.IOWorker;
+import ServerIO.PathWatcher;
 
 /**
  * Opens and listens to new socket connections
@@ -13,12 +14,14 @@ public class Main {
 
     private static final int PORT = 54872;
     private static final int maxConnections = 32;
-    public static int filecounter = 1;
     static Semaphore sem = new Semaphore(maxConnections);
 
     public static IOWorker ioWorker = new IOWorker();
+    private static PathWatcher pathWatcher = new PathWatcher();
 
     public static void main(String[] args) {
+        Thread pathWatcherWorker = new Thread(pathWatcher);
+        pathWatcherWorker.start();
         Socket connection;
         try {
             ServerSocket server = new ServerSocket(PORT);

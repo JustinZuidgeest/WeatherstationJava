@@ -35,11 +35,12 @@ public class QueryWorker implements Runnable{
      * Uses the IOWorker instance to retrieve data from a file and creates WeatherMeasurement objects from the data
      */
     private void parseQuery(){
-        int fileCounter = Main.filecounter;
-        String filePath = ("csv/temp (" + fileCounter + ").csv");
-        Main.filecounter++;
-        System.out.println("Opening " + filePath);
-        ArrayList<String> csvLines = Main.ioWorker.readFile(filePath);
+        //Yield thread if IOWorker happens to be updating its most recent data
+        while(!Main.ioWorker.getQueryable()){
+            Thread.yield();
+            System.out.println("Thread yeeting");
+        }
+        ArrayList<String> csvLines = Main.ioWorker.getUpdateList();
         HashMap<String, HashMap> stationList = Main.ioWorker.getStationList();
         ArrayList<ArrayList> queryMeasurements = new ArrayList<>();
 
@@ -79,9 +80,8 @@ public class QueryWorker implements Runnable{
      * @return The windchill temperature in C
      */
     private float calculateWindchill(float temperature, float windspeed){
-        float windchill = (float) (13.12 + (0.6215 * temperature) - (11.37 * (Math.pow(windspeed, 0.16)))
+        return (float) (13.12 + (0.6215 * temperature) - (11.37 * (Math.pow(windspeed, 0.16)))
                 + (0.3965 * temperature * (Math.pow(windspeed, 0.16))));
-        return windchill;
     }
 
     /**
