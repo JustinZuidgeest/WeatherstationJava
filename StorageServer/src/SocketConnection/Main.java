@@ -2,9 +2,8 @@ package SocketConnection;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import ServerIO.IOWorker;
-import ServerIO.PathWatcher;
+import ServerIO.FileWatcher;
 
 /**
  * Opens and listens to new socket connections
@@ -17,10 +16,10 @@ public class Main {
     static Semaphore sem = new Semaphore(maxConnections);
 
     public static IOWorker ioWorker = new IOWorker();
-    private static PathWatcher pathWatcher = new PathWatcher();
+    private static FileWatcher fileWatcher = new FileWatcher();
 
     public static void main(String[] args) {
-        Thread pathWatcherWorker = new Thread(pathWatcher);
+        Thread pathWatcherWorker = new Thread(fileWatcher);
         pathWatcherWorker.start();
         Socket connection;
         try {
