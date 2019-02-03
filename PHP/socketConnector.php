@@ -19,6 +19,25 @@ function update(){
   return $parsed;
 }
 
+function history($date){
+  //Establish connection with storage application
+  $socket = connectSocket();
+
+  //Request update data
+  $input = "history;".$date."\r\n";
+  socket_write($socket, $input, strlen($input));
+  $result = socket_read($socket, 4096, PHP_NORMAL_READ);
+
+  //Close socket
+  socket_close($socket);
+
+  //Parse data into associative array
+  $parsed = parseData($result);
+
+  //Return parsed data to caller
+  return $parsed;
+}
+
 //Establishes a connection with the local java storage application
 function connectSocket(){
   $address = "localhost";
@@ -54,11 +73,11 @@ function parseData($result){
   return $aso;
 }
 
-//$data = update();
+ $data = update();
 
-// Print result
-//foreach($data as $row) {
-  //print_r($row);
-  //echo "<br><br>";
-//}
+  // Print result
+  foreach($data as $row) {
+    print_r($row);
+    echo "<br><br>";
+  }
 ?>

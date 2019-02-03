@@ -143,6 +143,11 @@ public class FileWatcher implements Runnable {
         ArrayList<String> hourLines = Main.ioWorker.readFile(hourPath + currentHour + ".csv");
         HashMap<String, ArrayList<Float[]>> stationReadings = new HashMap<>();
 
+        if (hourLines == null){
+            System.out.println("No data found in file: " + hourPath + currentHour + ".csv");
+            return;
+        }
+
         //Loop through all the lines in the file
         for (String line : hourLines){
             String[] splitLine = line.split(",");

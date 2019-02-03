@@ -88,6 +88,7 @@ public class QueryWorker implements Runnable{
         //Read all the lines of the file into an ArrayList
         ArrayList<String> allLines = Main.ioWorker.readFile(filepath);
 
+        //Notify the PHP script of no data could be extracted for the specified file
         if (allLines == null){
             connectionWorker.setReturnQuery("No Data");
             return;
@@ -224,6 +225,10 @@ public class QueryWorker implements Runnable{
             //Sort the measurements of the country by their windchill using the WindchillSorter class
             Arrays.sort(countryMeasurementsArray, new WindchillSorter());
             StringBuilder tempBuilder = new StringBuilder();
+
+            for(WeatherMeasurement wem : countryMeasurementsArray){
+                System.out.println(wem.getLocation() + " " + wem.getWindchillString());
+            }
 
             //For every measurement, create a string of the location, country, windchill and airpressure of that measurement
             //seperated by a comma and closed by a ; symbol. The amount of measurement Strings per country is dictated by the
