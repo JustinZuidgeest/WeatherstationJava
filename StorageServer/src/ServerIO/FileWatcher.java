@@ -65,6 +65,13 @@ public class FileWatcher implements Runnable {
         }
     }
 
+    /**
+     * Appends the avarage weathermeasurement data that is received every minute to an hourly log. When a new hour starts,
+     * it calls the writeToDay function to calculate the avarages of that day and append it to the dayly data log.
+     *
+     * @param event The event (creation of a file) that was detected by the WatchKey. Contains the filepath of the
+     * new file that was created
+     */
     private void handleUpdate(WatchEvent<?> event){
         //Extract filepath of newly created file
         String fileName = event.context().toString();
@@ -96,7 +103,7 @@ public class FileWatcher implements Runnable {
             currentHour = fileHour;
         }
 
-        //Append the most recent data to the current hour file
+        //Append the most recent data to a StringBuilder
         System.out.println("Appending to hour file");
         StringBuilder hourBuilder = new StringBuilder();
         ArrayList<String> lines = Main.ioWorker.getUpdateList();
@@ -104,6 +111,8 @@ public class FileWatcher implements Runnable {
             hourBuilder.append(line);
             hourBuilder.append("\n");
         }
+
+        //Write the contens of the StringBuilder to the current hour file
         Main.ioWorker.writeFile(hourPath + currentHour + ".csv", hourBuilder.toString());
     }
 
@@ -164,11 +173,14 @@ public class FileWatcher implements Runnable {
             float avarageWind = totalWind / count;
             fileContent.append(entry.getKey());
             fileContent.append(",");
-            fileContent.append(String.format("\"%.2f\"", avarageTemp).replace(",", "."));
+            String tempSTR = String.format("\"%.2f\"", avarageTemp).replace(",", ".");
+            fileContent.append(tempSTR.substring(1, tempSTR.length() -1));
             fileContent.append(",");
-            fileContent.append(String.format("\"%.2f\"", avarageWind).replace(",", "."));
+            String windSTR = String.format("\"%.2f\"", avarageWind).replace(",", ".");
+            fileContent.append(windSTR.substring(1, windSTR.length() -1));
             fileContent.append(",");
-            fileContent.append(String.format("\"%.2f\"", avaragePressure).replace(",", "."));
+            String pressureSTR = String.format("\"%.2f\"", avaragePressure).replace(",", ".");
+            fileContent.append(pressureSTR.substring(1, pressureSTR.length() -1));
             fileContent.append("\n");
         }
 
