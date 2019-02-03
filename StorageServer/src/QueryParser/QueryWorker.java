@@ -117,7 +117,8 @@ public class QueryWorker implements Runnable{
                 tempBuilder.append(",");
                 tempBuilder.append(tempMeasurement.getCountry());
                 tempBuilder.append(",");
-                tempBuilder.append(tempMeasurement.getWindchillString());
+                String windchillSTR = tempMeasurement.getWindchillString();
+                tempBuilder.append(windchillSTR.substring(1, windchillSTR.length() -1));
                 tempBuilder.append(",");
                 tempBuilder.append(tempMeasurement.getAirStation());
                 tempBuilder.append(";");

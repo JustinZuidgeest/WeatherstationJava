@@ -77,8 +77,10 @@ public class IOWorker{
             filereader.close();
         }catch(FileNotFoundException fnException){
             System.out.println("Error opening a file: " + fnException.toString());
+            return null;
         }catch(IOException ioException){
             System.out.println("Error reading csv line" + ioException.toString());
+            return null;
         }
         return dataset;
     }
@@ -118,7 +120,10 @@ public class IOWorker{
      * @param filepath The path to the file that contains the new data
      */
     public void refreshUpdateList(String filepath){
-        updateList = readFile(filepath);
+        updateList = null;
+        while (updateList == null){
+            updateList = readFile(filepath);
+        }
     }
 
     /**
