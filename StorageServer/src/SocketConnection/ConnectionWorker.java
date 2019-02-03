@@ -41,33 +41,43 @@ public class ConnectionWorker implements Runnable{
             while(connection.isConnected()){
                 //If a String is send over the socket, handle it according to the contents of that String
                 if ((bufferedReader.ready() && (input = bufferedReader.readLine()) != null)) {
+                    //Process the standard list of countries when 'update' is sent over the socket
                     if (input.startsWith("update")) {
                         String[] countries = {"FRANCE", "MEXICO", "UNITED STATES", "SPAIN", "NORTH POLE", "SOUTH POLE"};
-                        Thread queryThread = new Thread(new QueryWorker(this, countries , 10));
+                        Thread queryThread = new Thread(new QueryWorker(this, countries , 10, null));
                         queryThread.start();
+                    //Process a custom list of countries and datacount if the socketcommand starts with 'fetch'
                     }else if(input.startsWith("fetch")){
                         try {
                             //Split the fetch command into an array of countries and an integer for the data count
                             String[] arguments = input.split(";");
                             String[] countries = arguments[1].toUpperCase().split(",");
                             int count = Integer.parseInt(arguments[2]);
-                            Thread queryThread = new Thread(new QueryWorker(this, countries, count));
+                            Thread queryThread = new Thread(new QueryWorker(this, countries, count, null));
                             queryThread.start();
+                        //Process the standard list of countries from a given date if the socketcommand starts with 'history'
                         }catch (Exception exception){
                             writeOut("Error Parsing Query");
                             System.out.println(exception.toString());
                         }
-                    }else if(input.startsWith("hello")){
-                        writeOut("Hi");
-                    }else if(input.startsWith("close")){
-                        break;
+                    }else if(input.startsWith("history")){
+                        //Split the fetch command into an array of countries and an integer for the data count
+                        String[] arguments = input.split(";");
+                        String date = arguments[1];
+                        String[] countries = {"FRANCE", "MEXICO", "UNITED STATES", "SPAIN", "NORTH POLE", "SOUTH POLE"};
+                        Thread queryThread = new Thread(new QueryWorker(this, countries , 10, "storage/day/" + date + ".csv"));
+                        queryThread.start();
                     }else{
                         writeOut("Invalid Request");
                     }
                 }
                 if (returnQuery != null){
                     System.out.println("Done parsing query, closing connection...");
-                    writeOut(returnQuery);
+                    if(returnQuery.equals("No Data")){
+                        writeOut("");
+                    }else{
+                        writeOut(returnQuery);
+                    }
                     break;
                 }
             }

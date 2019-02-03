@@ -6,6 +6,7 @@ import SocketConnection.Main;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The QueryWorker class is responsible for parsing the requested data into a String format to be sent back to the PHP
@@ -16,31 +17,40 @@ public class QueryWorker implements Runnable{
     private ConnectionWorker connectionWorker;
     private String[] countries;
     private int count;
+    private String filepath;
 
-    public QueryWorker(ConnectionWorker connectionWorker, String[] countries, int count){
+    public QueryWorker(ConnectionWorker connectionWorker, String[] countries, int count, String filepath){
         this.connectionWorker = connectionWorker;
         this.countries = countries;
         this.count = count;
+        this.filepath = filepath;
     }
 
     @Override
     public void run() {
         long startTime = System.currentTimeMillis();
-        parseQuery();
+
+        //Check if the filepath is null (and therefore an update query was requested)
+        if (filepath == null){
+            parseUpdate();
+        }else{
+            getAvarages();
+        }
         long estimatedTime = System.currentTimeMillis() - startTime;
         System.out.println("Query Thread Done. Estimated execution time: " + estimatedTime + "ms");
     }
 
     /**
-     * Uses the IOWorker instance to retrieve data from a file and creates WeatherMeasurement objects from the data
+     * Uses the IOWorker instance to retrieve data from the latest update file and creates WeatherMeasurement objects from the data
      */
-    private void parseQuery(){
+    private void parseUpdate(){
         //Yield thread if IOWorker happens to be updating its most recent data
         while(!Main.ioWorker.getQueryable()){
             Thread.yield();
-            System.out.println("Thread yeeting");
+            System.out.println("Thread yielding");
         }
         ArrayList<String> csvLines = Main.ioWorker.getUpdateList();
+
         HashMap<String, HashMap> stationList = Main.ioWorker.getStationList();
         ArrayList<ArrayList> queryMeasurements = new ArrayList<>();
 
@@ -62,6 +72,113 @@ public class QueryWorker implements Runnable{
                             splitLine[0], stationName, stationCountry, splitLine[1], splitLine[2], splitLine[3],windchill,
                             splitLine[4], splitLine[5], splitLine[6], splitLine[7], splitLine[8], splitLine[9], splitLine[10],
                             splitLine[11], splitLine[12], tempEvents);
+                    countryMeasurements.add(tempMeasurement);
+                }
+            }
+            queryMeasurements.add(countryMeasurements);
+        }
+        //Pass the ArrayList filled with WeatherMeasurement objects for every country to the String parse function
+        parseToString(queryMeasurements);
+    }
+
+    /**
+     * Calculates the avarages per station from a retrieved file
+     */
+    private void getAvarages(){
+        //Read all the lines of the file into an ArrayList
+        ArrayList<String> allLines = Main.ioWorker.readFile(filepath);
+
+        if (allLines == null){
+            connectionWorker.setReturnQuery("No Data");
+            return;
+        }
+
+        HashMap<String, ArrayList<Float[]>> stationReadings = new HashMap<>();
+
+        //Loop through all the lines in the file
+        for (String line : allLines){
+            String[] splitLine = line.split(",");
+            //If the stationID key already exists, add the measurements to an ArrayList inside a hashmap
+            if (stationReadings.containsKey(splitLine[0])){
+                Float temp = Float.parseFloat(splitLine[1]);
+                Float wind = Float.parseFloat(splitLine[2]);
+                Float pressure = Float.parseFloat(splitLine[3]);
+                Float[] tempFloat = {temp, pressure, wind};
+
+                stationReadings.get(splitLine[0]).add(tempFloat);
+            //If the stationID doesn't exist yet, put a new ArrayList in the hashmap using the stationID as key
+            }else{
+                Float temp = Float.parseFloat(splitLine[1]);
+                Float wind = Float.parseFloat(splitLine[2]);
+                Float pressure = Float.parseFloat(splitLine[3]);
+                Float[] tempFloat = {temp, pressure, wind};
+
+                ArrayList<Float[]> tempArray = new ArrayList<>();
+                tempArray.add(tempFloat);
+
+                stationReadings.put(splitLine[0], tempArray);
+            }
+        }
+
+        //The ArrayList that will be sent to be parsed for the PHP request
+        ArrayList<String> historyArray = new ArrayList<>();
+
+        //Loop through the hashmap containing station measurements, calculating avarages per station and appending those
+        //avarages to the StringBuilder
+        for(Map.Entry<String, ArrayList<Float[]>> entry : stationReadings.entrySet()){
+            StringBuilder builder = new StringBuilder();
+            int count = 0;
+            float totalTemp = 0;
+            float totalPressure = 0;
+            float totalWind = 0;
+            for (Float[] stationReading : entry.getValue()){
+                totalTemp += stationReading[0];
+                totalPressure += stationReading[1];
+                totalWind += stationReading[2];
+                count++;
+            }
+            float avarageTemp = totalTemp / count;
+            float avaragePressure = totalPressure / count;
+            float avarageWind = totalWind / count;
+            builder.append(entry.getKey());
+            builder.append(",");
+            String tempSTR = String.format("\"%.2f\"", avarageTemp).replace(",", ".");
+            builder.append(tempSTR.substring(1, tempSTR.length() -1));
+            builder.append(",");
+            String windSTR = String.format("\"%.2f\"", avarageWind).replace(",", ".");
+            builder.append(windSTR.substring(1, windSTR.length() -1));
+            builder.append(",");
+            String pressureSTR = String.format("\"%.2f\"", avaragePressure).replace(",", ".");
+            builder.append(pressureSTR.substring(1, pressureSTR.length() -1));
+            historyArray.add(builder.toString());
+        }
+        parseHistory(historyArray);
+    }
+
+    /**
+     * Uses the IOWorker instance to retrieve data from the requested day and creates WeatherMeasurement objects from the data
+     */
+    private void parseHistory(ArrayList<String> csvLines){
+        HashMap<String, HashMap> stationList = Main.ioWorker.getStationList();
+        ArrayList<ArrayList> queryMeasurements = new ArrayList<>();
+
+        for (String country : countries) {
+            ArrayList<WeatherMeasurement> countryMeasurements = new ArrayList<>();
+            for (String line : csvLines) {
+                //Split every line of the csv file at the , symbol
+                String[] splitLine = line.split(",");
+                HashMap<String, String> stationData = stationList.get(splitLine[0]);
+                //Find the country associated with the weatherstation
+                String stationCountry = stationData.get("CNT");
+
+                //If the weatherstation is inside a country that was requested in the query, make a new WeatherMeasurement object
+                if (stationCountry.equals(country)) {
+                    String stationName = stationData.get("LOC");
+                    float windchill = calculateWindchill(Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[2]));
+                    WeatherMeasurement tempMeasurement = new WeatherMeasurement(
+                            splitLine[0], stationName, stationCountry, null, null, splitLine[1], windchill,
+                            null, splitLine[3], null, null, splitLine[2], null, null,
+                            null, null, null);
                     countryMeasurements.add(tempMeasurement);
                 }
             }
