@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class WeatherIOWorker implements Runnable {
 
+    private final static String fs = System.getProperty("file.separator");
     private String title;
     private ArrayList<ArrayList<WeatherMeasurement>> data;
 
@@ -20,7 +21,7 @@ public class WeatherIOWorker implements Runnable {
 
     public void run() {
         try {
-            File file = new File(title + ".csv");
+            File file = new File("raw" + fs + title + ".csv");
             FileChannel fc = new RandomAccessFile(file, "rw").getChannel();
             ByteBuffer buffer = fc.map(FileChannel.MapMode.READ_WRITE, 0, 920*data.size());
             for (ArrayList<WeatherMeasurement> al : data) {

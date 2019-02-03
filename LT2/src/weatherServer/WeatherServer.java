@@ -9,25 +9,18 @@ import java.util.concurrent.Executors;
 
 public class WeatherServer {
     private static final int PORT = 54871;
-    private static final int maxConnections = 800;
-    private static boolean running = true;
-    public static Semaphore sem = new Semaphore(maxConnections);
-    public static WeatherIO wio = new WeatherIO();
     private static ExecutorService pool = Executors.newFixedThreadPool(800);
+    static WeatherIO wio = new WeatherIO();
 
     public static void main(String[] args) {
         Socket con;
         try {
             ServerSocket server = new ServerSocket(PORT);
-            while (running) {
+            while (true) {
                 con = server.accept();
-                pool.execute(new WorkerThread(con));
+                pool.execute(new WeatherWorker(con));
             }
         }
-        catch (java.io.IOException ioe) {}
-    }
-
-    private boolean isRunning() {
-        return running;
+        catch (java.io.IOException ioe) { System.out.println("WeatherServer ioe: " + ioe); }
     }
 }

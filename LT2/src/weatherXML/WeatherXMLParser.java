@@ -20,20 +20,19 @@ public class WeatherXMLParser extends DefaultHandler {
     private String current;
     private HashMap<Integer, WeatherCorrection> correct;
     private String datetime = "";
+    SAXParserFactory fac = SAXParserFactory.newInstance();
 
     public WeatherXMLParser() {}
 
-    public void parseData(ByteArrayInputStream data) {
-        SAXParserFactory fac = SAXParserFactory.newInstance();
+    public ArrayList<WeatherMeasurement> parseData(ByteArrayInputStream data) {
         try {
             SAXParser par = fac.newSAXParser();
             par.parse(data, this);
         }
         catch (ParserConfigurationException pce) { System.out.println("pce: " + pce); }
-        catch (SAXException se) {
-            System.out.println("se: " + se);
-        }
+        catch (SAXException se) { System.out.println("se: " + se); }
         catch (IOException ioe) { System.out.println("ioe: " + ioe); }
+        return list;
     }
 
     @Override
@@ -82,10 +81,8 @@ public class WeatherXMLParser extends DefaultHandler {
                         float fold = correct.get(temp.getStation()).getTemperature();
                         float diff = fnew - fold;
                         if (diff > 3) {
-                            //System.out.println("Temperature too high. Value is " + fnew + " while average is " + fold);
                             temp.setTemperature(fold + 3);
                         } else if (diff < -3) {
-                            //System.out.println("Temperature too low. Value is " + fnew + " while average is " + fold);
                             temp.setTemperature(fold - 3);
                         } else {
                             temp.setTemperature(fnew);
@@ -139,14 +136,7 @@ public class WeatherXMLParser extends DefaultHandler {
             }
         }
         catch (NumberFormatException nfe) {
-            if (correct != null && correct.size() > 9) {
-                temp = errHandler.handleEmptyString(nfe, flag, temp, correct.get(temp.getStation()));
-            } else {
-                temp = errHandler.handleEmptyString(nfe, flag, temp, new WeatherCorrection());
-            }
-        }
-        catch (NullPointerException npe) {
-            temp = errHandler.handleEmptyString(npe, flag, temp, new WeatherCorrection());
+            temp = errHandler.handleEmptyString(flag, temp, new WeatherCorrection());
         }
     }
 
@@ -177,6 +167,7 @@ public class WeatherXMLParser extends DefaultHandler {
             createCorrections();
         }
     }
-    public ArrayList<WeatherMeasurement> getData() { return list; }
+
     public String getDateTime() { return datetime; }
+    public HashMap<Integer, WeatherCorrection> getCorrections() { return correct; }
 }

@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class WorkerThread implements Runnable {
+public class WeatherWorker implements Runnable {
 
     private byte[] bytes = new byte[3200];
     private byte[] trail = new byte[25];
@@ -17,18 +17,16 @@ public class WorkerThread implements Runnable {
     private ByteArrayOutputStream buf = new ByteArrayOutputStream();
     private WeatherXMLParser parser = new WeatherXMLParser();
     private Socket con;
-    private String datetime;
-    private BufferedInputStream in;
+    private InputStream in;
     private int count;
 
-    public WorkerThread(Socket con) {
+    WeatherWorker(Socket con) {
         this.con = con;
     }
 
     public void run() {
         try {
-            WeatherServer.sem.attempt();
-            in = new BufferedInputStream(con.getInputStream());
+            in = con.getInputStream();
             while ((count = in.read(bytes)) > 0) {
                 buf.write(bytes, 0, count);
                 while (buf.size() < 3200 && count != -1) {
@@ -37,26 +35,26 @@ public class WorkerThread implements Runnable {
                     buf.write(b, 0, count);
                 }
                 loopTillTarget();
-                in.read(trail);
+                if ((count = in.read(trail)) > 0) {
+                    buf.write(trail, 0, count);
+                }
                 if (!checkMatchAndLoop()) { continue; }
-                buf.write(trail);
                 if (count != -1) {
-                    parser.parseData(new ByteArrayInputStream(buf.toByteArray()));
-                    data.add(parser.getData());
-                    datetime = parser.getDateTime();
+                    data.add(parser.parseData(new ByteArrayInputStream(buf.toByteArray())));
+                    String datetime = parser.getDateTime();
                     if (datetime.substring(18, 19).equals("9")) {
-                        WeatherServer.wio.addLines(parser.getDateTime().substring(0, 16).replace(":", "-"), data);
+                        WeatherServer.wio.addData(parser.getDateTime().substring(0, 16).replace(":", "-"), data);
                         data.clear();
+                    }
+                    if (datetime.substring(17, 19).equals("45")) {
+                        WeatherServer.wio.addMinute(parser.getDateTime().substring(0, 16).replace(":", "-"), parser.getCorrections());
                     }
                     buf = new ByteArrayOutputStream();
                 }
             }
-            System.out.println("Closing");
             this.con.close();
-            WeatherServer.sem.close();
         }
-        catch (IOException ioe) { System.out.println("ioe: " + ioe); }
-        catch (InterruptedException ie) { System.out.println("ie: " + ie); }
+        catch (IOException ioe) { System.out.println("WeatherWorker ioe: " + ioe); }
     }
 
     private void loopTillTarget() {
@@ -71,22 +69,26 @@ public class WorkerThread implements Runnable {
 
     private boolean checkMatchAndLoop() {
         try {
-            while (!Arrays.equals(trail, check) && count != -1) {
-                if (buf.size() < 3300) {
-                    loopTillTarget();
-                    count = in.read(trail);
+            while (!Arrays.equals(trail, check)) {
+                if (count != -1) {
+                    if (buf.size() < 3300) {
+                        loopTillTarget();
+                        if ((count = in.read(trail)) > 0) {
+                            buf.write(trail, 0, count);
+                        }
+                    } else {
+                        byte[] flush = new byte[in.available()];
+                        in.read(flush);
+                        buf = new ByteArrayOutputStream();
+                        return false;
+                    }
                 } else {
-                    System.out.println("Flushing");
-                    byte[] flush = new byte[in.available()];
-                    in.read(flush);
-                    buf = new ByteArrayOutputStream();
                     return false;
                 }
             }
             return true;
         }
         catch (IOException ioe) { System.out.println("checkMatchAndLoop ioe: " + ioe); }
-        System.out.println("Nani");
         return true;
     }
 }

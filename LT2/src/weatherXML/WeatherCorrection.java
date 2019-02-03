@@ -88,4 +88,32 @@ public class WeatherCorrection {
     public float getSnow()          { return snow; }
     public float getClouds()        { return clouds; }
     public float getWindDegree()    { return windDegree; }
+
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(station);
+        sb.append(",");
+        sb.append((double)Math.round(temperature * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(dew * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(airStation * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(airSea * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(visibility * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(windSpeed * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(rain * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(snow * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(clouds * 100d) / 100d);
+        sb.append(",");
+        sb.append((double)Math.round(windDegree * 100d) / 100d);
+        sb.append("\n");
+        return sb.toString();
+    }
 }
