@@ -1,7 +1,12 @@
 package ServerIO;
 
 import SocketConnection.Main;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,9 +80,20 @@ public class FileWatcher implements Runnable {
     private void handleUpdate(WatchEvent<?> event){
         //Extract filepath of newly created file
         String fileName = event.context().toString();
+
+        File file = new File(minutePath + fileName);
+        while (!file.renameTo(file)) {
+            try {
+                System.out.println("File locked, sleeping...");
+                Thread.sleep(1000);
+            } catch (InterruptedException ieException) {
+                System.out.println("Thread Interrupted: " + ieException.toString());
+            }
+        }
+
         //Lock the IOWorker so no connectionthreads can access its data and update it with the new file
         Main.ioWorker.setQueryable(false);
-        Main.ioWorker.refreshUpdateList(fileName);
+        Main.ioWorker.refreshUpdateList(minutePath + fileName);
         Main.ioWorker.setQueryable(true);
 
         //Delete the new file after it has been processed
