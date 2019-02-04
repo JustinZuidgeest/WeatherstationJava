@@ -1,7 +1,8 @@
 package SocketConnection;
 
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.FileWriter;
+import java.net.*;
+
 import ServerIO.IOWorker;
 import ServerIO.FileWatcher;
 
@@ -19,6 +20,15 @@ public class Main {
     private static FileWatcher fileWatcher = new FileWatcher();
 
     public static void main(String[] args) {
+        //Save the local ip address to the remote server as fallback for DDNS
+        try {
+            String localIP = InetAddress.getLocalHost().getHostAddress();
+            System.out.println("local host ip:" +  localIP);
+            ioWorker.writeFile("/DataShare/ip.txt", localIP + "\n");
+        }catch (UnknownHostException uhException){
+            System.out.println("Unknown host: " + uhException.toString());
+        }
+
         Thread pathWatcherWorker = new Thread(fileWatcher);
         pathWatcherWorker.start();
         Socket connection;

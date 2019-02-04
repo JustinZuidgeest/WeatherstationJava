@@ -8,8 +8,6 @@ public class WeatherMeasurement {
     private String station;
     private String location;
     private String country;
-    private String date;
-    private String time;
     private String temperature;
     private float windchill;
     private String dew;
@@ -21,17 +19,14 @@ public class WeatherMeasurement {
     private String snow;
     private String clouds;
     private String windDegree;
-    private String[] events;
 
-    public WeatherMeasurement(String station, String location, String country, String date, String time, String temperature,
+    public WeatherMeasurement(String station, String location, String country, String temperature,
                               float windchill, String dew, String airStation, String airSea, String visibility,
-                              String windSpeed, String rain, String snow, String clouds, String windDegree, String[] events)
+                              String windSpeed, String rain, String snow, String clouds, String windDegree)
     {
         this.station = station;
         this.location = location;
         this.country = country;
-        this.date = date;
-        this.time = time;
         this.temperature = temperature;
         this.windchill = windchill;
         this.dew = dew;
@@ -43,7 +38,6 @@ public class WeatherMeasurement {
         this.snow = snow;
         this.clouds = clouds;
         this.windDegree = windDegree;
-        this.events = events;
     }
 
     public String getStation() {
@@ -53,14 +47,6 @@ public class WeatherMeasurement {
     public String getLocation() { return location; }
 
     public String getCountry() { return country; }
-
-    public String getDate() {
-        return date;
-    }
-
-    public String getTime() {
-        return time;
-    }
 
     public String getTemperature() {
         return temperature;
@@ -101,8 +87,6 @@ public class WeatherMeasurement {
     public String getSnow() {
         return snow;
     }
-
-    public String[] getEvents() { return events; }
 
     public String getClouds() {
         return clouds;

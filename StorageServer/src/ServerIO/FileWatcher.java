@@ -18,9 +18,9 @@ import java.util.Map;
  */
 public class FileWatcher implements Runnable {
 
-    private String minutePath = "storage/minute/";
-    private String hourPath = "storage/hour/";
-    private String dayPath = "storage/day/";
+    private String minutePath = "/DataShare/minute/";
+    private String hourPath = "/DataShare/hour/";
+    private String dayPath = "/DataShare/day/";
 
     private String currentHour = "00";
     private String currentDate = null;
@@ -58,7 +58,6 @@ public class FileWatcher implements Runnable {
             while ((key = watchService.take()) != null) {
                 //Retrieve the List of events that occurred
                 for(WatchEvent<?> event : key.pollEvents()){
-                    System.out.println("New file detected: " + event.context().toString());
                     //Pass the list of events to the handleUpdate function for processing
                     handleUpdate(event);
                 }
@@ -81,6 +80,15 @@ public class FileWatcher implements Runnable {
         //Extract filepath of newly created file
         String fileName = event.context().toString();
 
+        try {
+            System.out.println("New File detected, sleeping untill file is processed...");
+            Thread.sleep(10000);
+        }catch (InterruptedException iException){
+            System.out.println("Error going to sleep " + iException.toString());
+        }
+
+        //Check that the file can be renamed (no lock is currently held by another program) and sleep thread if a lock
+        //is present
         File file = new File(minutePath + fileName);
         while (!file.renameTo(file)) {
             try {

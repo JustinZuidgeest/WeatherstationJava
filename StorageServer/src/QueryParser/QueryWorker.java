@@ -50,6 +50,7 @@ public class QueryWorker implements Runnable{
             System.out.println("Thread yielding");
         }
         ArrayList<String> csvLines = Main.ioWorker.getUpdateList();
+        System.out.println("Fetched new data: " + csvLines.size());
 
         HashMap<String, HashMap> stationList = Main.ioWorker.getStationList();
         ArrayList<ArrayList> queryMeasurements = new ArrayList<>();
@@ -66,12 +67,11 @@ public class QueryWorker implements Runnable{
                 //If the weatherstation is inside a country that was requested in the query, make a new WeatherMeasurement object
                 if (stationCountry.equals(country)) {
                     String stationName = stationData.get("LOC");
-                    float windchill = calculateWindchill(Float.parseFloat(splitLine[3]), Float.parseFloat(splitLine[8]));
-                    String[] tempEvents = {splitLine[13], splitLine[14], splitLine[15], splitLine[16], splitLine[17], splitLine[18]};
+                    float windchill = calculateWindchill(Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[6]));
                     WeatherMeasurement tempMeasurement = new WeatherMeasurement(
-                            splitLine[0], stationName, stationCountry, splitLine[1], splitLine[2], splitLine[3],windchill,
-                            splitLine[4], splitLine[5], splitLine[6], splitLine[7], splitLine[8], splitLine[9], splitLine[10],
-                            splitLine[11], splitLine[12], tempEvents);
+                            splitLine[0], stationName, stationCountry, splitLine[1],windchill,
+                            splitLine[2], splitLine[3], splitLine[4], splitLine[5], splitLine[6], splitLine[7], splitLine[8],
+                            splitLine[9], splitLine[10]);
                     countryMeasurements.add(tempMeasurement);
                 }
             }
@@ -177,9 +177,9 @@ public class QueryWorker implements Runnable{
                     String stationName = stationData.get("LOC");
                     float windchill = calculateWindchill(Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[2]));
                     WeatherMeasurement tempMeasurement = new WeatherMeasurement(
-                            splitLine[0], stationName, stationCountry, null, null, splitLine[1], windchill,
+                            splitLine[0], stationName, stationCountry, splitLine[1], windchill,
                             null, splitLine[3], null, null, splitLine[2], null, null,
-                            null, null, null);
+                            null, null);
                     countryMeasurements.add(tempMeasurement);
                 }
             }
@@ -210,6 +210,8 @@ public class QueryWorker implements Runnable{
      */
     private void parseToString(ArrayList<ArrayList> queryMeasurements){
 
+        System.out.println("Lenght of ArrayList of country data: " + queryMeasurements.size());
+
         StringBuilder queryBuilder = new StringBuilder();
         String parsedQuery;
 
@@ -226,14 +228,11 @@ public class QueryWorker implements Runnable{
             Arrays.sort(countryMeasurementsArray, new WindchillSorter());
             StringBuilder tempBuilder = new StringBuilder();
 
-            for(WeatherMeasurement wem : countryMeasurementsArray){
-                System.out.println(wem.getLocation() + " " + wem.getWindchillString());
-            }
-
             //For every measurement, create a string of the location, country, windchill and airpressure of that measurement
             //seperated by a comma and closed by a ; symbol. The amount of measurement Strings per country is dictated by the
             //count variable passed during creation of this class
-            for (int i=0; i < count; i++){
+            for (int i=0; i < countryMeasurementsArray.length; i++){
+                if (i >= count) break;
                 WeatherMeasurement tempMeasurement = countryMeasurementsArray[i];
                 tempBuilder.append(tempMeasurement.getLocation());
                 tempBuilder.append(",");

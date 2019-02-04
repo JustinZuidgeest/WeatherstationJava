@@ -73,11 +73,11 @@ function parseData($result){
   return $aso;
 }
 
- $data = update();
+ //$data = update();
 
   // Print result
-  foreach($data as $row) {
-    print_r($row);
-    echo "<br><br>";
-  }
+  //foreach($data as $row) {
+    //print_r($row);
+    //echo "<br><br>";
+  //}
 ?>

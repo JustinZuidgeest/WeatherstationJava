@@ -67,7 +67,12 @@ public class IOWorker{
      * @return  The ArrayList containing a String for every line of the read file
      */
     public synchronized ArrayList<String> readFile(String filepath){
+        System.out.println("Reading file: " + filepath);
         String line;
+
+        File file = new File(filepath);
+        System.out.println("File size is: " + file.length());
+
         ArrayList<String> dataset = new ArrayList<>();
         try{
             BufferedReader filereader = new BufferedReader(new FileReader(filepath));
@@ -120,6 +125,7 @@ public class IOWorker{
      * @param filepath The path to the file that contains the new data
      */
     public void refreshUpdateList(String filepath){
+        System.out.println("Refreshing update list...");
         updateList = readFile(filepath);
     }
 

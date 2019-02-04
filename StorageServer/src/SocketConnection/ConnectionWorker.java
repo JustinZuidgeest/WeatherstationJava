@@ -65,7 +65,7 @@ public class ConnectionWorker implements Runnable{
                         String[] arguments = input.split(";");
                         String date = arguments[1];
                         String[] countries = {"FRANCE", "MEXICO", "UNITED STATES", "SPAIN", "NORTH POLE", "SOUTH POLE"};
-                        Thread queryThread = new Thread(new QueryWorker(this, countries , 10, "storage/day/" + date + ".csv"));
+                        Thread queryThread = new Thread(new QueryWorker(this, countries , 10, "/DataShare/day/" + date + ".csv"));
                         queryThread.start();
                     }else{
                         writeOut("Invalid Request");
