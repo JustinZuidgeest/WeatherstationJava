@@ -3,10 +3,7 @@ package ServerIO;
 import SocketConnection.Main;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,9 +15,10 @@ import java.util.Map;
  */
 public class FileWatcher implements Runnable {
 
-    private String minutePath = "/DataShare/minute/";
-    private String hourPath = "/DataShare/hour/";
-    private String dayPath = "/DataShare/day/";
+    private String rawPath = Main.rawPath;
+    private String minutePath = Main.minutePath;
+    private String hourPath = Main.hourPath;
+    private String dayPath = Main.dayPath;
 
     private String currentHour = "00";
     private String currentDate = null;
@@ -80,11 +78,21 @@ public class FileWatcher implements Runnable {
         //Extract filepath of newly created file
         String fileName = event.context().toString();
 
+        //Sleep until the NFS share can process the file and upload it in it's entirety
         try {
-            System.out.println("New File detected, sleeping untill file is processed...");
+            System.out.println("New File detected: " + fileName + " sleeping until file is processed...");
             Thread.sleep(10000);
         }catch (InterruptedException iException){
-            System.out.println("Error going to sleep " + iException.toString());
+            System.out.println("Error sleeping thread: " + iException.toString());
+        }
+
+        //Clean up all the files in the raw directory (they are not needed for the project requirements)
+        File cleanupDirectory = new File(rawPath);
+        File[] files = cleanupDirectory.listFiles();
+        for (File file : files){
+            if (!file.delete()){
+                System.out.println("Failed to delete raw file: " + file.getPath());
+            }
         }
 
         //Check that the file can be renamed (no lock is currently held by another program) and sleep thread if a lock
@@ -128,7 +136,6 @@ public class FileWatcher implements Runnable {
         }
 
         //Append the most recent data to a StringBuilder
-        System.out.println("Appending to hour file");
         StringBuilder hourBuilder = new StringBuilder();
         ArrayList<String> lines = Main.ioWorker.getUpdateList();
         for (String line : lines){
@@ -136,7 +143,8 @@ public class FileWatcher implements Runnable {
             hourBuilder.append("\n");
         }
 
-        //Write the contens of the StringBuilder to the current hour file
+        System.out.println("Appending to hour file");
+        //Write the contents of the StringBuilder to the current hour file
         Main.ioWorker.writeFile(hourPath + currentHour + ".csv", hourBuilder.toString());
     }
 

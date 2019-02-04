@@ -54,7 +54,7 @@ public class IOWorker{
             }
             filereader.close();
         }catch(FileNotFoundException fnException){
-            System.out.println("Error opening a file: " + fnException.toString());
+            System.out.println("Error reading station file: " + fnException.toString());
         }catch(IOException ioException){
             System.out.println("Error reading csv line" + ioException.toString());
         }

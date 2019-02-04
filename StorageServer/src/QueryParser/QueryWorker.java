@@ -37,7 +37,7 @@ public class QueryWorker implements Runnable{
             getAvarages();
         }
         long estimatedTime = System.currentTimeMillis() - startTime;
-        System.out.println("Query Thread Done. Estimated execution time: " + estimatedTime + "ms");
+        System.out.println("Query Thread Done. Estimated execution time: " + estimatedTime + "ms\n");
     }
 
     /**
@@ -47,10 +47,9 @@ public class QueryWorker implements Runnable{
         //Yield thread if IOWorker happens to be updating its most recent data
         while(!Main.ioWorker.getQueryable()){
             Thread.yield();
-            System.out.println("Thread yielding");
         }
         ArrayList<String> csvLines = Main.ioWorker.getUpdateList();
-        System.out.println("Fetched new data: " + csvLines.size());
+        System.out.println("Fetched new data. Size: " + csvLines.size());
 
         HashMap<String, HashMap> stationList = Main.ioWorker.getStationList();
         ArrayList<ArrayList> queryMeasurements = new ArrayList<>();
@@ -209,9 +208,6 @@ public class QueryWorker implements Runnable{
      * @param queryMeasurements The ArrayList filled with WeatherMeasurement objects for every country requested
      */
     private void parseToString(ArrayList<ArrayList> queryMeasurements){
-
-        System.out.println("Lenght of ArrayList of country data: " + queryMeasurements.size());
-
         StringBuilder queryBuilder = new StringBuilder();
         String parsedQuery;
 

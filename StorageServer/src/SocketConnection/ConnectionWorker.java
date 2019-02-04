@@ -43,11 +43,13 @@ public class ConnectionWorker implements Runnable{
                 if ((bufferedReader.ready() && (input = bufferedReader.readLine()) != null)) {
                     //Process the standard list of countries when 'update' is sent over the socket
                     if (input.startsWith("update")) {
+                        System.out.println("Query received for update");
                         String[] countries = {"FRANCE", "MEXICO", "UNITED STATES", "SPAIN", "NORTH POLE", "SOUTH POLE"};
                         Thread queryThread = new Thread(new QueryWorker(this, countries , 10, null));
                         queryThread.start();
                     //Process a custom list of countries and datacount if the socketcommand starts with 'fetch'
                     }else if(input.startsWith("fetch")){
+                        System.out.println("Query received for fetch: " + input);
                         try {
                             //Split the fetch command into an array of countries and an integer for the data count
                             String[] arguments = input.split(";");
@@ -61,18 +63,18 @@ public class ConnectionWorker implements Runnable{
                             System.out.println(exception.toString());
                         }
                     }else if(input.startsWith("history")){
+                        System.out.println("Query received for history: " + input);
                         //Split the fetch command into an array of countries and an integer for the data count
                         String[] arguments = input.split(";");
                         String date = arguments[1];
                         String[] countries = {"FRANCE", "MEXICO", "UNITED STATES", "SPAIN", "NORTH POLE", "SOUTH POLE"};
-                        Thread queryThread = new Thread(new QueryWorker(this, countries , 10, "/DataShare/day/" + date + ".csv"));
+                        Thread queryThread = new Thread(new QueryWorker(this, countries , 10, Main.dayPath + date + ".csv"));
                         queryThread.start();
                     }else{
                         writeOut("Invalid Request");
                     }
                 }
                 if (returnQuery != null){
-                    System.out.println("Done parsing query, closing connection...");
                     if(returnQuery.equals("No Data")){
                         writeOut("");
                     }else{
@@ -83,7 +85,6 @@ public class ConnectionWorker implements Runnable{
             }
             //After a reply has been sent over the socket, close the connection and update the Semaphore
             connection.close();
-            System.out.println("Socket was closed...");
             Main.sem.close();
         }catch (InterruptedException ieException){
             System.out.println("Thread interruption error :" + ieException.toString());
