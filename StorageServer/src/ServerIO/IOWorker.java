@@ -125,7 +125,6 @@ public class IOWorker{
      * @param filepath The path to the file that contains the new data
      */
     public void refreshUpdateList(String filepath){
-        System.out.println("Refreshing update list...");
         updateList = readFile(filepath);
     }
 

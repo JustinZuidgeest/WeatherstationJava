@@ -16,11 +16,11 @@ public class Main {
     private static final int maxConnections = 32;
     static Semaphore sem = new Semaphore(maxConnections);
 
-    public static final String datasharePath = "DataShare/";
-    public static final String rawPath = "DataShare/raw/";
-    public static final String minutePath = "DataShare/minute/";
-    public static final String hourPath = "DataShare/hour/";
-    public static final String dayPath = "DataShare/day/";
+    public static final String datasharePath = "/DataShare/";
+    public static final String rawPath = "/DataShare/raw/";
+    public static final String minutePath = "/DataShare/minute/";
+    public static final String hourPath = "/DataShare/hour/";
+    public static final String dayPath = "/DataShare/day/";
 
     public static IOWorker ioWorker = new IOWorker();
     private static FileWatcher fileWatcher = new FileWatcher();
