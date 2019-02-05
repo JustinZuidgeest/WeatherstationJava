@@ -133,8 +133,8 @@ public class QueryWorker implements Runnable{
             float totalWind = 0;
             for (Float[] stationReading : entry.getValue()){
                 totalTemp += stationReading[0];
-                totalPressure += stationReading[1];
-                totalWind += stationReading[2];
+                totalWind += stationReading[1];
+                totalPressure += stationReading[2];
                 count++;
             }
             float avarageTemp = totalTemp / count;
@@ -175,6 +175,7 @@ public class QueryWorker implements Runnable{
                 if (stationCountry.equals(country)) {
                     String stationName = stationData.get("LOC");
                     float windchill = calculateWindchill(Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[2]));
+                    System.out.println("History query: temp = " + splitLine[1] + " , windchill = " + windchill + " , pressure = " + splitLine[3]);
                     WeatherMeasurement tempMeasurement = new WeatherMeasurement(
                             splitLine[0], stationName, stationCountry, splitLine[1], windchill,
                             null, splitLine[3], null, null, splitLine[2], null, null,

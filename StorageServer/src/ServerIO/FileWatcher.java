@@ -89,9 +89,11 @@ public class FileWatcher implements Runnable {
         //Clean up all the files in the raw directory (they are not needed for the project requirements)
         File cleanupDirectory = new File(rawPath);
         File[] files = cleanupDirectory.listFiles();
-        for (File file : files){
-            if (!file.delete()){
-                System.out.println("Failed to delete raw file: " + file.getPath());
+        if (files != null){
+            for (File file : files){
+                if (!file.delete()){
+                    System.out.println("Failed to delete raw file: " + file.getPath());
+                }
             }
         }
 
@@ -169,18 +171,18 @@ public class FileWatcher implements Runnable {
             String[] splitLine = line.split(",");
             //If the stationID key already exists, add the measurements to an ArrayList inside a hashmap
             if (stationReadings.containsKey(splitLine[0])){
-                Float temp = Float.parseFloat(splitLine[3]);
-                Float wind = Float.parseFloat(splitLine[8]);
-                Float pressure = Float.parseFloat(splitLine[5]);
-                Float[] tempFloat = {temp, pressure, wind};
+                Float temp = Float.parseFloat(splitLine[1]);
+                Float wind = Float.parseFloat(splitLine[6]);
+                Float pressure = Float.parseFloat(splitLine[3]);
+                Float[] tempFloat = {temp, wind, pressure,};
 
                 stationReadings.get(splitLine[0]).add(tempFloat);
             //If the stationID doesn't exist yet, put a new ArrayList in the hashmap using the stationID as key
             }else{
-                Float temp = Float.parseFloat(splitLine[3]);
-                Float wind = Float.parseFloat(splitLine[8]);
-                Float pressure = Float.parseFloat(splitLine[5]);
-                Float[] tempFloat = {temp, pressure, wind};
+                Float temp = Float.parseFloat(splitLine[1]);
+                Float wind = Float.parseFloat(splitLine[6]);
+                Float pressure = Float.parseFloat(splitLine[3]);
+                Float[] tempFloat = {temp, wind, pressure};
 
                 ArrayList<Float[]> tempArray = new ArrayList<>();
                 tempArray.add(tempFloat);
@@ -201,8 +203,8 @@ public class FileWatcher implements Runnable {
             float totalWind = 0;
             for (Float[] stationReading : entry.getValue()){
                 totalTemp += stationReading[0];
-                totalPressure += stationReading[1];
-                totalWind += stationReading[2];
+                totalWind += stationReading[1];
+                totalPressure += stationReading[2];
                 count++;
             }
             float avarageTemp = totalTemp / count;
