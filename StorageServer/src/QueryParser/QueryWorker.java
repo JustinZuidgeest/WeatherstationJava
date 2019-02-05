@@ -175,7 +175,6 @@ public class QueryWorker implements Runnable{
                 if (stationCountry.equals(country)) {
                     String stationName = stationData.get("LOC");
                     float windchill = calculateWindchill(Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[2]));
-                    System.out.println("History query: temp = " + splitLine[1] + ", windspeed = " + splitLine[2] + " , windchill = " + windchill + " , pressure = " + splitLine[3]);
                     WeatherMeasurement tempMeasurement = new WeatherMeasurement(
                             splitLine[0], stationName, stationCountry, stationData.get("LAT"), stationData.get("LONG"),
                             splitLine[1], windchill, null, splitLine[3], null, null, splitLine[2],
