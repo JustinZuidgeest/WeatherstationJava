@@ -8,6 +8,8 @@ public class WeatherMeasurement {
     private String station;
     private String location;
     private String country;
+    private String lat;
+    private String lng;
     private String temperature;
     private float windchill;
     private String dew;
@@ -20,13 +22,15 @@ public class WeatherMeasurement {
     private String clouds;
     private String windDegree;
 
-    public WeatherMeasurement(String station, String location, String country, String temperature,
+    public WeatherMeasurement(String station, String location, String country, String lat, String lng, String temperature,
                               float windchill, String dew, String airStation, String airSea, String visibility,
                               String windSpeed, String rain, String snow, String clouds, String windDegree)
     {
         this.station = station;
         this.location = location;
         this.country = country;
+        this.lat = lat;
+        this.lng = lng;
         this.temperature = temperature;
         this.windchill = windchill;
         this.dew = dew;
@@ -47,6 +51,10 @@ public class WeatherMeasurement {
     public String getLocation() { return location; }
 
     public String getCountry() { return country; }
+
+    public String getLat() { return lat; }
+
+    public String getLng() { return lng; }
 
     public String getTemperature() {
         return temperature;

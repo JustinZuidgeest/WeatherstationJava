@@ -68,9 +68,9 @@ public class QueryWorker implements Runnable{
                     String stationName = stationData.get("LOC");
                     float windchill = calculateWindchill(Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[6]));
                     WeatherMeasurement tempMeasurement = new WeatherMeasurement(
-                            splitLine[0], stationName, stationCountry, splitLine[1],windchill,
-                            splitLine[2], splitLine[3], splitLine[4], splitLine[5], splitLine[6], splitLine[7], splitLine[8],
-                            splitLine[9], splitLine[10]);
+                            splitLine[0], stationName, stationCountry, stationData.get("LAT"), stationData.get("LONG"),
+                            splitLine[1],windchill, splitLine[2], splitLine[3], splitLine[4], splitLine[5], splitLine[6],
+                            splitLine[7], splitLine[8], splitLine[9], splitLine[10]);
                     countryMeasurements.add(tempMeasurement);
                 }
             }
@@ -177,9 +177,9 @@ public class QueryWorker implements Runnable{
                     float windchill = calculateWindchill(Float.parseFloat(splitLine[1]), Float.parseFloat(splitLine[2]));
                     System.out.println("History query: temp = " + splitLine[1] + " , windchill = " + windchill + " , pressure = " + splitLine[3]);
                     WeatherMeasurement tempMeasurement = new WeatherMeasurement(
-                            splitLine[0], stationName, stationCountry, splitLine[1], windchill,
-                            null, splitLine[3], null, null, splitLine[2], null, null,
-                            null, null);
+                            splitLine[0], stationName, stationCountry, stationData.get("LAT"), stationData.get("LONG"),
+                            splitLine[1], windchill, null, splitLine[3], null, null, splitLine[2],
+                            null, null, null, null);
                     countryMeasurements.add(tempMeasurement);
                 }
             }
@@ -213,7 +213,7 @@ public class QueryWorker implements Runnable{
         String parsedQuery;
 
         //Create the header line that PHP will use to label the data
-        queryBuilder.append("LOCATION,COUNTRY,WINDCHILL,AIRPRESSURE;");
+        queryBuilder.append("LOCATION,COUNTRY,WINDCHILL,AIRPRESSURE,LAT,LONG;");
 
         //Loop for every country present in the ArrayList
         for (ArrayList<WeatherMeasurement> countryMeasurements : queryMeasurements){
@@ -239,6 +239,10 @@ public class QueryWorker implements Runnable{
                 tempBuilder.append(windchillSTR.substring(1, windchillSTR.length() -1));
                 tempBuilder.append(",");
                 tempBuilder.append(tempMeasurement.getAirStation());
+                tempBuilder.append(",");
+                tempBuilder.append(tempMeasurement.getLat());
+                tempBuilder.append(",");
+                tempBuilder.append(tempMeasurement.getLng());
                 tempBuilder.append(";");
             }
             queryBuilder.append(tempBuilder.toString());
